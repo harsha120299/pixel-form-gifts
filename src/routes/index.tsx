@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   MessageCircle, Camera, Palette, Printer, Truck,
   Instagram, Facebook, Mail, MapPin, Star, ChevronDown, Menu, X, Sparkles, Lightbulb, Frame, Boxes, Heart,
+  UploadCloud, Image as ImageIcon, FileText, CheckCircle2, AlertTriangle, Loader2
 } from "lucide-react";
 import heroFig from "@/assets/hero-figurine.png";
 import g1 from "@/assets/gallery-1.jpg";
@@ -20,9 +21,20 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const WA = "https://wa.me/947XXXXXXXX?text=Hi%20I%20want%20to%20order%20a%20custom%203D%20figurine";
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "";
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "";
+
+const WA = "https://wa.me/94766065801?text=Hi%20I%20want%20to%20order%20a%20custom%203D%20figurine";
 const waFor = (product: string) =>
-  `https://wa.me/947XXXXXXXX?text=${encodeURIComponent(`Hi! I'd like to order: ${product}`)}`;
+  `https://wa.me/94766065801?text=${encodeURIComponent(`Hi! I'd like to order: ${product}`)}`;
+
+const waForWithPhotos = (product: string, frontUrl: string | null, sideUrl: string | null, notes: string) => {
+  let message = `Hi! I'd like to order a customized *${product}*.\n\n`;
+  if (frontUrl) message += `📸 *Front Photo:* ${frontUrl}\n`;
+  if (sideUrl) message += `📸 *Side Photo:* ${sideUrl}\n`;
+  if (notes.trim()) message += `📝 *Custom Notes:* ${notes}\n`;
+  return `https://wa.me/94766065801?text=${encodeURIComponent(message)}`;
+};
 
 const nav = [
   { label: "Home", href: "#home" },
@@ -67,7 +79,7 @@ function Nav() {
             ))}
           </nav>
           <a href={WA} target="_blank" rel="noopener"
-             className="hidden lg:inline-flex items-center gap-2 bg-gradient-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-semibold hover:shadow-glow transition-all hover:scale-105">
+            className="hidden lg:inline-flex items-center gap-2 bg-gradient-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-semibold hover:shadow-glow transition-all hover:scale-105">
             <MessageCircle className="w-4 h-4" /> Order Now
           </a>
           <button className="lg:hidden p-2 text-foreground" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -78,12 +90,12 @@ function Nav() {
           <div className="lg:hidden glass rounded-2xl mt-2 p-4 flex flex-col gap-1 animate-fade-up">
             {nav.map((n) => (
               <a key={n.href} href={n.href} onClick={() => setOpen(false)}
-                 className="px-3 py-3 text-sm hover:bg-secondary rounded-lg">
+                className="px-3 py-3 text-sm hover:bg-secondary rounded-lg">
                 {n.label}
               </a>
             ))}
             <a href={WA} target="_blank" rel="noopener"
-               className="mt-2 inline-flex items-center justify-center gap-2 bg-gradient-primary text-primary-foreground px-5 py-3 rounded-full text-sm font-semibold">
+              className="mt-2 inline-flex items-center justify-center gap-2 bg-gradient-primary text-primary-foreground px-5 py-3 rounded-full text-sm font-semibold">
               <MessageCircle className="w-4 h-4" /> Order on WhatsApp
             </a>
           </div>
@@ -116,17 +128,17 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
             <a href={WA} target="_blank" rel="noopener"
-               className="inline-flex items-center justify-center gap-2 bg-gradient-primary text-primary-foreground px-7 py-4 rounded-full font-semibold text-base hover:shadow-glow transition-all hover:scale-105">
+              className="inline-flex items-center justify-center gap-2 bg-gradient-primary text-primary-foreground px-7 py-4 rounded-full font-semibold text-base hover:shadow-glow transition-all hover:scale-105">
               <MessageCircle className="w-5 h-5" /> Order via WhatsApp
             </a>
             <a href="#gallery"
-               className="inline-flex items-center justify-center gap-2 glass px-7 py-4 rounded-full font-semibold text-base hover:bg-secondary transition-all">
+              className="inline-flex items-center justify-center gap-2 glass px-7 py-4 rounded-full font-semibold text-base hover:bg-secondary transition-all">
               View Gallery
             </a>
           </div>
           <div className="mt-10 flex items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
-              <div className="flex">{Array.from({length:5}).map((_,i)=>(<Star key={i} className="w-4 h-4 fill-primary text-primary"/>))}</div>
+              <div className="flex">{Array.from({ length: 5 }).map((_, i) => (<Star key={i} className="w-4 h-4 fill-primary text-primary" />))}</div>
               <span>4.9 from 500+ orders</span>
             </div>
           </div>
@@ -135,12 +147,12 @@ function Hero() {
         <div className="relative flex justify-center items-center">
           <div className="absolute inset-0 bg-gradient-primary opacity-30 blur-3xl rounded-full animate-glow" />
           <img src={heroFig} alt="Custom 3D figurine of a couple" width={520} height={520}
-               className="relative w-full max-w-lg drop-shadow-[0_30px_60px_rgba(0,0,0,0.6)] animate-float" />
+            className="relative w-full max-w-lg drop-shadow-[0_30px_60px_rgba(0,0,0,0.6)] animate-float" />
           <div className="absolute top-10 -left-2 glass rounded-2xl p-3 animate-float-slow hidden sm:block">
             <div className="text-xs text-muted-foreground">Hand-painted</div>
             <div className="font-display font-bold">Premium Finish</div>
           </div>
-          <div className="absolute bottom-10 -right-2 glass rounded-2xl p-3 animate-float hidden sm:block" style={{animationDelay:"1s"}}>
+          <div className="absolute bottom-10 -right-2 glass rounded-2xl p-3 animate-float hidden sm:block" style={{ animationDelay: "1s" }}>
             <div className="text-xs text-muted-foreground">Made in</div>
             <div className="font-display font-bold">🇱🇰 Sri Lanka</div>
           </div>
@@ -165,7 +177,7 @@ function How() {
         <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {steps.map((s, i) => (
             <div key={i} className="group relative bg-gradient-card rounded-3xl p-6 border border-border hover:border-primary/40 transition-all hover:-translate-y-1 shadow-card">
-              <div className="absolute top-4 right-5 text-6xl font-display font-bold text-primary/10">0{i+1}</div>
+              <div className="absolute top-4 right-5 text-6xl font-display font-bold text-primary/10">0{i + 1}</div>
               <div className="w-12 h-12 rounded-2xl bg-gradient-primary grid place-items-center shadow-glow group-hover:scale-110 transition-transform">
                 <s.icon className="w-6 h-6 text-primary-foreground" />
               </div>
@@ -200,27 +212,45 @@ type Product = {
 };
 
 const products: Product[] = [
-  { id: "c1", name: "Single Cartoon Figurine", category: "cartoon", price: "8,000", img: catCartoon, tag: "Bestseller",
-    features: ["Pixar-style cartoon", "16 cm tall", "Hand-painted", "Display base"] },
-  { id: "c2", name: "Couple Cartoon Figurines", category: "cartoon", price: "12,000", img: g5,
-    features: ["Two characters", "Custom poses", "Shared scenic base"] },
-  { id: "c3", name: "Family Cartoon Set", category: "cartoon", price: "18,000", img: g4,
-    features: ["3+ characters", "Group composition", "Premium finish"] },
-  { id: "a1", name: "Anime Action Figure", category: "anime", price: "10,000", img: catAnime, tag: "New",
-    features: ["Dynamic anime pose", "Vibrant paint", "Detailed accessories"] },
-  { id: "a2", name: "Anime Character Bust", category: "anime", price: "7,500", img: g2,
-    features: ["Head & shoulders", "Ultra-detailed hair", "Display plinth"] },
-  { id: "l1", name: "Personalized LED Light Box", category: "lightbox", price: "5,500", img: catLightbox,
-    features: ["Acrylic 3D engraving", "Wooden LED base", "USB powered"] },
-  { id: "l2", name: "Couple Photo Light Box", category: "lightbox", price: "6,500", img: catLightbox, tag: "Gift Pick",
-    features: ["Your photo engraved", "Warm glow", "Romantic gift"] },
-  { id: "s1", name: "Couple Silhouette Shadow Box", category: "shadowbox", price: "7,500", img: catShadowbox,
-    features: ["Layered paper-cut art", "LED backlight", "Wall mountable"] },
-  { id: "s2", name: "Custom Story Shadow Box", category: "shadowbox", price: "9,500", img: catShadowbox,
-    features: ["Your story scene", "Premium wood frame", "Gift-ready packaging"] },
+  {
+    id: "c1", name: "Single Cartoon Figurine", category: "cartoon", price: "8,000", img: catCartoon, tag: "Bestseller",
+    features: ["Pixar-style cartoon", "16 cm tall", "Hand-painted", "Display base"]
+  },
+  {
+    id: "c2", name: "Couple Cartoon Figurines", category: "cartoon", price: "12,000", img: g5,
+    features: ["Two characters", "Custom poses", "Shared scenic base"]
+  },
+  {
+    id: "c3", name: "Family Cartoon Set", category: "cartoon", price: "18,000", img: g4,
+    features: ["3+ characters", "Group composition", "Premium finish"]
+  },
+  {
+    id: "a1", name: "Anime Action Figure", category: "anime", price: "10,000", img: catAnime, tag: "New",
+    features: ["Dynamic anime pose", "Vibrant paint", "Detailed accessories"]
+  },
+  {
+    id: "a2", name: "Anime Character Bust", category: "anime", price: "7,500", img: g2,
+    features: ["Head & shoulders", "Ultra-detailed hair", "Display plinth"]
+  },
+  {
+    id: "l1", name: "Personalized LED Light Box", category: "lightbox", price: "5,500", img: catLightbox,
+    features: ["Acrylic 3D engraving", "Wooden LED base", "USB powered"]
+  },
+  {
+    id: "l2", name: "Couple Photo Light Box", category: "lightbox", price: "6,500", img: catLightbox, tag: "Gift Pick",
+    features: ["Your photo engraved", "Warm glow", "Romantic gift"]
+  },
+  {
+    id: "s1", name: "Couple Silhouette Shadow Box", category: "shadowbox", price: "7,500", img: catShadowbox,
+    features: ["Layered paper-cut art", "LED backlight", "Wall mountable"]
+  },
+  {
+    id: "s2", name: "Custom Story Shadow Box", category: "shadowbox", price: "9,500", img: catShadowbox,
+    features: ["Your story scene", "Premium wood frame", "Gift-ready packaging"]
+  },
 ];
 
-function Products() {
+function Products({ onSelectProduct }: { onSelectProduct: (product: Product) => void }) {
   const [active, setActive] = useState<Category>("all");
   const list = active === "all" ? products : products.filter((p) => p.category === active);
   return (
@@ -261,7 +291,7 @@ function Products() {
                   </span>
                 )}
                 <span className="absolute top-3 right-3 glass text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wide">
-                  {categories.find((c) => c.id === p.category)?.label.replace(" Figures","").replace(" Boxes","")}
+                  {categories.find((c) => c.id === p.category)?.label.replace(" Figures", "").replace(" Boxes", "")}
                 </span>
               </div>
               <div className="p-6">
@@ -277,10 +307,10 @@ function Products() {
                     </li>
                   ))}
                 </ul>
-                <a href={waFor(p.name)} target="_blank" rel="noopener"
-                  className="mt-5 inline-flex items-center justify-center gap-2 w-full px-4 py-3 rounded-full text-sm font-semibold bg-gradient-primary text-primary-foreground hover:shadow-glow transition-all hover:scale-[1.02]">
+                <button onClick={() => onSelectProduct(p)}
+                  className="mt-5 inline-flex items-center justify-center gap-2 w-full px-4 py-3 rounded-full text-sm font-semibold bg-gradient-primary text-primary-foreground hover:shadow-glow transition-all hover:scale-[1.02] cursor-pointer">
                   <MessageCircle className="w-4 h-4" /> Order on WhatsApp
-                </a>
+                </button>
               </div>
             </article>
           ))}
@@ -312,7 +342,7 @@ function Gallery() {
           {gallery.map((g, i) => (
             <div key={i} className={`group relative overflow-hidden rounded-3xl bg-card border border-border ${g.h}`}>
               <img src={g.src} alt={g.alt} loading="lazy"
-                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="absolute bottom-3 left-3 right-3 text-xs font-medium text-foreground opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all">
                 {g.alt}
@@ -325,33 +355,178 @@ function Gallery() {
   );
 }
 
-const reviews = [
-  { name: "Anushka P.", text: "The figurine of me and my husband looks just like us. Best anniversary gift ever!", img: "https://i.pravatar.cc/120?img=47" },
-  { name: "Dilshan R.", text: "Quality blew me away — the paint finish is super premium. Worth every rupee.", img: "https://i.pravatar.cc/120?img=12" },
-  { name: "Tharushi M.", text: "Ordered a family figurine for my parents. They literally cried. So emotional 🥹", img: "https://i.pravatar.cc/120?img=49" },
-  { name: "Kavindu S.", text: "Anime style turned out incredible. Got so many compliments on it!", img: "https://i.pravatar.cc/120?img=32" },
+const DEFAULT_REVIEWS = [
+  { name: "Anushka P.", rating: 5, text: "The figurine of me and my husband looks just like us. Best anniversary gift ever!", img: "https://i.pravatar.cc/120?img=47" },
+  { name: "Dilshan R.", rating: 5, text: "Quality blew me away — the paint finish is super premium. Worth every rupee.", img: "https://i.pravatar.cc/120?img=12" },
+  { name: "Tharushi M.", rating: 5, text: "Ordered a family figurine for my parents. They literally cried. So emotional 🥹", img: "https://i.pravatar.cc/120?img=49" },
+  { name: "Kavindu S.", rating: 5, text: "Anime style turned out incredible. Got so many compliments on it!", img: "https://i.pravatar.cc/120?img=32" },
 ];
 
 function Reviews() {
+  const [reviewsList, setReviewsList] = useState(DEFAULT_REVIEWS);
+  const [formOpen, setFormOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newRating, setNewRating] = useState(5);
+  const [newText, setNewText] = useState("");
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("figura_reviews");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setReviewsList([...parsed, ...DEFAULT_REVIEWS]);
+      } catch (e) {
+        console.error("Failed to parse saved reviews", e);
+      }
+    }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim() || !newText.trim()) return;
+
+    const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(newName)}&backgroundColor=F43F5E`;
+
+    const newReview = {
+      name: newName.trim(),
+      rating: newRating,
+      text: newText.trim(),
+      img: avatarUrl,
+    };
+
+    const existingCustom = reviewsList.filter(
+      (r) => !DEFAULT_REVIEWS.some((d) => d.name === r.name && d.text === r.text)
+    );
+    const updatedCustom = [newReview, ...existingCustom];
+    localStorage.setItem("figura_reviews", JSON.stringify(updatedCustom));
+
+    setReviewsList([newReview, ...reviewsList]);
+    setNewName("");
+    setNewText("");
+    setNewRating(5);
+    setSubmitted(true);
+    setTimeout(() => {
+      setSubmitted(false);
+      setFormOpen(false);
+    }, 2000);
+  };
+
   return (
     <section id="reviews" className="py-24 relative">
       <div className="mx-auto max-w-7xl px-4">
         <SectionHead eyebrow="Reviews" title="Loved by 500+ happy customers" />
+        
         <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {reviews.map((r, i) => (
-            <div key={i} className="bg-gradient-card rounded-3xl p-6 border border-border hover:border-primary/40 transition-all hover:-translate-y-1 shadow-card">
-              <div className="flex gap-0.5">
-                {Array.from({length:5}).map((_,j)=>(<Star key={j} className="w-4 h-4 fill-primary text-primary"/>))}
+          {reviewsList.map((r, i) => {
+            const rating = r.rating ?? 5;
+            return (
+              <div key={i} className="bg-gradient-card rounded-3xl p-6 border border-border hover:border-primary/40 transition-all hover:-translate-y-1 shadow-card animate-fade-up">
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, j) => {
+                    const isFilled = j < rating;
+                    return (
+                      <Star 
+                        key={j} 
+                        className={`w-4 h-4 ${isFilled ? "fill-primary text-primary" : "text-muted-foreground"}`} 
+                      />
+                    );
+                  })}
+                </div>
+                <p className="mt-4 text-sm leading-relaxed">"{r.text}"</p>
+                <div className="mt-6 flex items-center gap-3">
+                  <img src={r.img} alt={r.name} loading="lazy" width={40} height={40}
+                    className="w-10 h-10 rounded-full border-2 border-primary/30 object-cover" />
+                  <div className="font-semibold text-sm">{r.name}</div>
+                </div>
               </div>
-              <p className="mt-4 text-sm leading-relaxed">"{r.text}"</p>
-              <div className="mt-6 flex items-center gap-3">
-                <img src={r.img} alt={r.name} loading="lazy" width={40} height={40}
-                     className="w-10 h-10 rounded-full border-2 border-primary/30" />
-                <div className="font-semibold text-sm">{r.name}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+
+        <div className="mt-10 flex justify-center">
+          <button 
+            onClick={() => setFormOpen(!formOpen)}
+            className="inline-flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-foreground font-semibold px-6 py-3 rounded-full text-sm transition-all hover:scale-105 cursor-pointer border-none"
+          >
+            {formOpen ? "Close Form" : "Write a Review"}
+          </button>
+        </div>
+
+        {formOpen && (
+          <form 
+            onSubmit={handleSubmit}
+            className="mt-8 max-w-xl mx-auto rounded-3xl border border-border p-6 md:p-8 bg-gradient-card shadow-glow animate-fade-up"
+          >
+            <h4 className="font-display font-bold text-lg mb-4">Share your experience</h4>
+            
+            {submitted ? (
+              <div className="text-center py-6">
+                <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2 animate-bounce" />
+                <p className="text-sm font-semibold text-emerald-500 animate-pulse">Thank you! Your review has been added.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="revName" className="block text-xs font-semibold mb-1 text-muted-foreground">Your Name</label>
+                  <input
+                    id="revName"
+                    type="text"
+                    required
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="E.g., John D."
+                    className="w-full rounded-2xl glass border border-border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-transparent text-foreground"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-muted-foreground">Rating</label>
+                  <div className="flex gap-1">
+                    {Array.from({ length: 5 }).map((_, idx) => {
+                      const starVal = idx + 1;
+                      const isSelected = starVal <= (hoverRating ?? newRating);
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setNewRating(starVal)}
+                          onMouseEnter={() => setHoverRating(starVal)}
+                          onMouseLeave={() => setHoverRating(null)}
+                          className="p-1 cursor-pointer transition-all hover:scale-110 border-none bg-transparent"
+                        >
+                          <Star 
+                            className={`w-6 h-6 ${isSelected ? "fill-primary text-primary" : "text-muted-foreground"}`} 
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="revText" className="block text-xs font-semibold mb-1 text-muted-foreground">Your Review</label>
+                  <textarea
+                    id="revText"
+                    required
+                    value={newText}
+                    onChange={(e) => setNewText(e.target.value)}
+                    placeholder="Describe your figurine's quality, paint finish, or how the recipient loved it!"
+                    className="w-full h-28 rounded-2xl glass border border-border p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-transparent text-foreground resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-primary text-primary-foreground font-semibold py-3 rounded-full text-sm hover:shadow-glow transition-all hover:scale-[1.02] cursor-pointer border-none"
+                >
+                  Submit Review
+                </button>
+              </div>
+            )}
+          </form>
+        )}
       </div>
     </section>
   );
@@ -375,7 +550,7 @@ function FAQ() {
           {faqs.map((f, i) => (
             <div key={i} className="bg-gradient-card rounded-2xl border border-border overflow-hidden">
               <button onClick={() => setOpen(open === i ? null : i)}
-                      className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+                className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
                 <span className="font-display font-semibold">{f.q}</span>
                 <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${open === i ? "rotate-180" : ""}`} />
               </button>
@@ -403,19 +578,19 @@ function Contact() {
             <p className="mt-2 text-muted-foreground">WhatsApp is the fastest way to start your order.</p>
             <div className="mt-8 space-y-3">
               <a href={WA} target="_blank" rel="noopener"
-                 className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-gradient-primary text-primary-foreground font-semibold hover:shadow-glow transition-all">
+                className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-gradient-primary text-primary-foreground font-semibold hover:shadow-glow transition-all">
                 <MessageCircle className="w-5 h-5" /> WhatsApp Us
               </a>
               <a href="https://instagram.com" target="_blank" rel="noopener"
-                 className="flex items-center gap-3 px-5 py-4 rounded-2xl glass hover:bg-secondary transition-all">
+                className="flex items-center gap-3 px-5 py-4 rounded-2xl glass hover:bg-secondary transition-all">
                 <Instagram className="w-5 h-5 text-primary" /> @figuralk
               </a>
               <a href="https://facebook.com" target="_blank" rel="noopener"
-                 className="flex items-center gap-3 px-5 py-4 rounded-2xl glass hover:bg-secondary transition-all">
+                className="flex items-center gap-3 px-5 py-4 rounded-2xl glass hover:bg-secondary transition-all">
                 <Facebook className="w-5 h-5 text-primary" /> FiguraLK
               </a>
               <a href="mailto:hello@figura.lk"
-                 className="flex items-center gap-3 px-5 py-4 rounded-2xl glass hover:bg-secondary transition-all">
+                className="flex items-center gap-3 px-5 py-4 rounded-2xl glass hover:bg-secondary transition-all">
                 <Mail className="w-5 h-5 text-primary" /> hello@figura.lk
               </a>
               <div className="flex items-center gap-3 px-5 py-4 rounded-2xl glass">
@@ -457,8 +632,8 @@ function Footer() {
 function FloatingWA() {
   return (
     <a href={WA} target="_blank" rel="noopener" aria-label="Order on WhatsApp"
-       className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full grid place-items-center shadow-glow hover:scale-110 transition-transform"
-       style={{ backgroundColor: "var(--whatsapp)" }}>
+      className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full grid place-items-center shadow-glow hover:scale-110 transition-transform"
+      style={{ backgroundColor: "var(--whatsapp)" }}>
       <MessageCircle className="w-7 h-7 text-white" />
       <span className="absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: "var(--whatsapp)", opacity: 0.3 }} />
     </a>
@@ -474,19 +649,310 @@ function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
   );
 }
 
+type OrderModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  product: Product | null;
+};
+
+function OrderModal({ isOpen, onClose, product }: OrderModalProps) {
+  const [frontImage, setFrontImage] = useState<string | null>(null);
+  const [sideImage, setSideImage] = useState<string | null>(null);
+  const [notes, setNotes] = useState("");
+  const [isUploadingFront, setIsUploadingFront] = useState(false);
+  const [isUploadingSide, setIsUploadingSide] = useState(false);
+  const [showConfigNotice, setShowConfigNotice] = useState(false);
+  const [isMockMode, setIsMockMode] = useState(false);
+
+  const frontInputRef = useRef<HTMLInputElement>(null);
+  const sideInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFrontImage(null);
+      setSideImage(null);
+      setNotes("");
+      setShowConfigNotice(false);
+      setIsMockMode(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen || !product) return null;
+
+  const handleUploadImage = async (file: File, isFront: boolean) => {
+    const setUploading = isFront ? setIsUploadingFront : setIsUploadingSide;
+    const setImage = isFront ? setFrontImage : setSideImage;
+
+    setUploading(true);
+    setShowConfigNotice(false);
+
+    // Development / Fallback Mock Mode:
+    // If Cloudinary credentials are not set up or are empty, simulate upload in dev mode
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+      setIsMockMode(true);
+      setShowConfigNotice(true);
+      setTimeout(() => {
+        const mockUrl = URL.createObjectURL(file);
+        setImage(mockUrl);
+        setUploading(false);
+      }, 1500);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Cloudinary API configuration error");
+      }
+
+      const data = await response.json();
+      setImage(data.secure_url);
+    } catch (err) {
+      console.error("Cloudinary upload failed, falling back to mock simulator:", err);
+      setIsMockMode(true);
+      setShowConfigNotice(true);
+      const mockUrl = URL.createObjectURL(file);
+      setImage(mockUrl);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isFront: boolean) => {
+    const file = e.target.files?.[0];
+    if (file) handleUploadImage(file, isFront);
+  };
+
+  const whatsAppLink = waForWithPhotos(
+    product.name,
+    isMockMode ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500" : frontImage,
+    isMockMode ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500" : sideImage,
+    notes
+  );
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-background/80 backdrop-blur-md animate-fade-in" 
+        onClick={onClose} 
+      />
+
+      {/* Modal Container */}
+      <div className="relative w-full max-w-2xl bg-gradient-card rounded-3xl border border-border p-6 md:p-8 shadow-glow animate-scale-up z-10 overflow-y-auto max-h-[90vh]">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-border">
+          <div>
+            <span className="text-xs font-semibold text-primary uppercase tracking-wider">Customize Order</span>
+            <h3 className="font-display font-bold text-2xl tracking-tight mt-1">{product.name}</h3>
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-10 h-10 rounded-full glass hover:bg-secondary grid place-items-center transition-all cursor-pointer border-none"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5 text-foreground" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="mt-6 space-y-6">
+          
+          {/* Cloudinary Notice */}
+          {showConfigNotice && (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-start gap-3 text-sm animate-fade-up">
+              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Cloudinary Mock Mode Enabled</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  We simulated this upload locally. To use live cloud storage, configure 
+                  <code className="px-1.5 py-0.5 mx-1 rounded bg-secondary text-foreground text-[11px] font-mono">VITE_CLOUDINARY_CLOUD_NAME</code> 
+                  and 
+                  <code className="px-1.5 py-0.5 mx-1 rounded bg-secondary text-foreground text-[11px] font-mono">VITE_CLOUDINARY_UPLOAD_PRESET</code>.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Photo Drop Zones */}
+          <div>
+            <label className="block text-sm font-semibold mb-3">Upload Reference Photos</label>
+            <p className="text-xs text-muted-foreground mb-4">
+              Upload clear front-facing and side-profile photos. Good lighting helps our designers capture every detail perfectly!
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              
+              {/* Front Photo Zone */}
+              <div 
+                onClick={() => !isUploadingFront && frontInputRef.current?.click()}
+                className={`relative h-44 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-4 cursor-pointer transition-all select-none
+                  ${frontImage 
+                    ? "border-emerald-500/40 bg-emerald-500/5" 
+                    : "border-border hover:border-primary/50 hover:bg-secondary/20"
+                  }`}
+              >
+                <input 
+                  type="file" 
+                  ref={frontInputRef}
+                  onChange={(e) => handleFileChange(e, true)}
+                  className="hidden" 
+                  accept="image/*"
+                />
+                
+                {isUploadingFront ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    <span className="text-xs text-muted-foreground">Uploading Front Photo...</span>
+                  </div>
+                ) : frontImage ? (
+                  <div className="relative w-full h-full flex flex-col items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2" />
+                    <span className="text-xs font-semibold text-emerald-500">Front Photo Uploaded</span>
+                    <span className="text-[10px] text-muted-foreground mt-1 truncate max-w-full">
+                      {isMockMode ? "Simulated File" : "Stored in Cloudinary"}
+                    </span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFrontImage(null);
+                      }}
+                      className="absolute top-2 right-2 px-2.5 py-1 text-[10px] rounded bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold border-none cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-center">
+                    <UploadCloud className="w-8 h-8 text-muted-foreground mb-2" />
+                    <span className="text-xs font-semibold">Front-Facing Photo</span>
+                    <span className="text-[10px] text-muted-foreground mt-1">Click to browse file</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Side Photo Zone */}
+              <div 
+                onClick={() => !isUploadingSide && sideInputRef.current?.click()}
+                className={`relative h-44 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-4 cursor-pointer transition-all select-none
+                  ${sideImage 
+                    ? "border-emerald-500/40 bg-emerald-500/5" 
+                    : "border-border hover:border-primary/50 hover:bg-secondary/20"
+                  }`}
+              >
+                <input 
+                  type="file" 
+                  ref={sideInputRef}
+                  onChange={(e) => handleFileChange(e, false)}
+                  className="hidden" 
+                  accept="image/*"
+                />
+                
+                {isUploadingSide ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    <span className="text-xs text-muted-foreground">Uploading Side Photo...</span>
+                  </div>
+                ) : sideImage ? (
+                  <div className="relative w-full h-full flex flex-col items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2" />
+                    <span className="text-xs font-semibold text-emerald-500">Side Photo Uploaded</span>
+                    <span className="text-[10px] text-muted-foreground mt-1 truncate max-w-full">
+                      {isMockMode ? "Simulated File" : "Stored in Cloudinary"}
+                    </span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSideImage(null);
+                      }}
+                      className="absolute top-2 right-2 px-2.5 py-1 text-[10px] rounded bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold border-none cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-center">
+                    <UploadCloud className="w-8 h-8 text-muted-foreground mb-2" />
+                    <span className="text-xs font-semibold">Side-Profile Photo</span>
+                    <span className="text-[10px] text-muted-foreground mt-1">Click to browse file</span>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+
+          {/* Notes Area */}
+          <div>
+            <label htmlFor="notes" className="block text-sm font-semibold mb-2">Special Requests / Custom Notes (Optional)</label>
+            <textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="E.g., Please draw a blue jacket, style my hair like the attached reference, or include our pet dog in the scenery."
+              className="w-full h-24 rounded-2xl glass border border-border p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all placeholder:text-muted-foreground bg-transparent text-foreground"
+            />
+          </div>
+
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 pt-4 border-t border-border flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <p className="text-xs text-muted-foreground text-center sm:text-left">
+            Once clicked, we will redirect you to WhatsApp with your order details prefilled.
+          </p>
+          <a
+            href={whatsAppLink}
+            target="_blank"
+            rel="noopener"
+            onClick={onClose}
+            className={`inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold shadow-glow transition-all hover:scale-[1.02] w-full sm:w-auto text-primary-foreground bg-gradient-primary border-none cursor-pointer`}
+          >
+            <MessageCircle className="w-4 h-4" /> Send Order via WhatsApp
+          </a>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 function Index() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [orderModalOpen, setOrderModalOpen] = useState(false);
+
   return (
     <main className="min-h-screen relative">
       <Nav />
       <Hero />
       <How />
-      <Products />
+      <Products onSelectProduct={(p) => {
+        setSelectedProduct(p);
+        setOrderModalOpen(true);
+      }} />
       <Gallery />
       <Reviews />
       <FAQ />
       <Contact />
       <Footer />
       <FloatingWA />
+      <OrderModal 
+        isOpen={orderModalOpen} 
+        onClose={() => setOrderModalOpen(false)} 
+        product={selectedProduct} 
+      />
     </main>
   );
 }
