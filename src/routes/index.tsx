@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   MessageCircle, Camera, Palette, Printer, Truck,
-  Instagram, Facebook, Mail, MapPin, Star, ChevronDown, Menu, X, Sparkles,
+  Instagram, Facebook, Mail, MapPin, Star, ChevronDown, Menu, X, Sparkles, Lightbulb, Frame, Boxes, Heart,
 } from "lucide-react";
 import heroFig from "@/assets/hero-figurine.png";
 import g1 from "@/assets/gallery-1.jpg";
@@ -11,17 +11,23 @@ import g3 from "@/assets/gallery-3.jpg";
 import g4 from "@/assets/gallery-4.jpg";
 import g5 from "@/assets/gallery-5.jpg";
 import g6 from "@/assets/gallery-6.jpg";
+import catAnime from "@/assets/cat-anime.jpg";
+import catCartoon from "@/assets/cat-cartoon.jpg";
+import catLightbox from "@/assets/cat-lightbox.jpg";
+import catShadowbox from "@/assets/cat-shadowbox.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 const WA = "https://wa.me/947XXXXXXXX?text=Hi%20I%20want%20to%20order%20a%20custom%203D%20figurine";
+const waFor = (product: string) =>
+  `https://wa.me/947XXXXXXXX?text=${encodeURIComponent(`Hi! I'd like to order: ${product}`)}`;
 
 const nav = [
   { label: "Home", href: "#home" },
   { label: "How It Works", href: "#how" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Products", href: "#products" },
   { label: "Gallery", href: "#gallery" },
   { label: "Reviews", href: "#reviews" },
   { label: "FAQ", href: "#faq" },
@@ -173,52 +179,116 @@ function How() {
   );
 }
 
-const tiers = [
-  { name: "Single Figurine", price: "8,000", features: ["16 cm tall", "Personalized design", "Hand-painted finish", "Display base"] },
-  { name: "Couple Figurines", price: "12,000", features: ["Two characters", "Custom poses", "Shared scenic base", "Premium paint"], featured: true },
-  { name: "Premium Display Edition", price: "20,000", features: ["Detailed sculpted base", "Optional LED display", "Ultra-premium finish", "Gift packaging"] },
+type Category = "all" | "cartoon" | "anime" | "lightbox" | "shadowbox";
+
+const categories: { id: Category; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: "all", label: "All Products", icon: Boxes },
+  { id: "cartoon", label: "Cartoon Figures", icon: Heart },
+  { id: "anime", label: "Anime Figures", icon: Sparkles },
+  { id: "lightbox", label: "Light Boxes", icon: Lightbulb },
+  { id: "shadowbox", label: "Shadow Boxes", icon: Frame },
 ];
 
-function Pricing() {
+type Product = {
+  id: string;
+  name: string;
+  category: Exclude<Category, "all">;
+  price: string;
+  img: string;
+  tag?: string;
+  features: string[];
+};
+
+const products: Product[] = [
+  { id: "c1", name: "Single Cartoon Figurine", category: "cartoon", price: "8,000", img: catCartoon, tag: "Bestseller",
+    features: ["Pixar-style cartoon", "16 cm tall", "Hand-painted", "Display base"] },
+  { id: "c2", name: "Couple Cartoon Figurines", category: "cartoon", price: "12,000", img: g5,
+    features: ["Two characters", "Custom poses", "Shared scenic base"] },
+  { id: "c3", name: "Family Cartoon Set", category: "cartoon", price: "18,000", img: g4,
+    features: ["3+ characters", "Group composition", "Premium finish"] },
+  { id: "a1", name: "Anime Action Figure", category: "anime", price: "10,000", img: catAnime, tag: "New",
+    features: ["Dynamic anime pose", "Vibrant paint", "Detailed accessories"] },
+  { id: "a2", name: "Anime Character Bust", category: "anime", price: "7,500", img: g2,
+    features: ["Head & shoulders", "Ultra-detailed hair", "Display plinth"] },
+  { id: "l1", name: "Personalized LED Light Box", category: "lightbox", price: "5,500", img: catLightbox,
+    features: ["Acrylic 3D engraving", "Wooden LED base", "USB powered"] },
+  { id: "l2", name: "Couple Photo Light Box", category: "lightbox", price: "6,500", img: catLightbox, tag: "Gift Pick",
+    features: ["Your photo engraved", "Warm glow", "Romantic gift"] },
+  { id: "s1", name: "Couple Silhouette Shadow Box", category: "shadowbox", price: "7,500", img: catShadowbox,
+    features: ["Layered paper-cut art", "LED backlight", "Wall mountable"] },
+  { id: "s2", name: "Custom Story Shadow Box", category: "shadowbox", price: "9,500", img: catShadowbox,
+    features: ["Your story scene", "Premium wood frame", "Gift-ready packaging"] },
+];
+
+function Products() {
+  const [active, setActive] = useState<Category>("all");
+  const list = active === "all" ? products : products.filter((p) => p.category === active);
   return (
-    <section id="pricing" className="py-24 relative">
+    <section id="products" className="py-24 relative">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="mx-auto max-w-7xl px-4">
-        <SectionHead eyebrow="Pricing" title="Pick your perfect figurine" />
-        <div className="mt-16 grid md:grid-cols-3 gap-6">
-          {tiers.map((t) => (
-            <div key={t.name}
-                 className={`relative rounded-3xl p-8 border transition-all hover:-translate-y-2 hover:shadow-glow
-                   ${t.featured
-                     ? "bg-gradient-card border-primary/50 shadow-glow"
-                     : "bg-gradient-card border-border hover:border-primary/30"}`}>
-              {t.featured && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full">
-                  MOST POPULAR
-                </div>
-              )}
-              <h3 className="font-display font-bold text-2xl">{t.name}</h3>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-sm text-muted-foreground">from</span>
-                <span className="font-display font-bold text-5xl">Rs. {t.price}</span>
+        <SectionHead eyebrow="Products" title="Explore our full collection" />
+        <p className="mt-4 text-center text-muted-foreground max-w-2xl mx-auto">
+          From cartoon and anime figurines to LED light boxes and shadow boxes — every piece is handcrafted to order.
+        </p>
+
+        <div className="mt-10 flex flex-wrap justify-center gap-2">
+          {categories.map((c) => {
+            const Icon = c.icon;
+            const isActive = active === c.id;
+            return (
+              <button key={c.id} onClick={() => setActive(c.id)}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all
+                  ${isActive
+                    ? "bg-gradient-primary text-primary-foreground shadow-glow scale-105"
+                    : "glass text-muted-foreground hover:text-foreground hover:bg-secondary"}`}>
+                <Icon className="w-4 h-4" /> {c.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {list.map((p) => (
+            <article key={p.id}
+              className="group relative bg-gradient-card rounded-3xl border border-border overflow-hidden shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all">
+              <div className="relative aspect-square overflow-hidden bg-secondary">
+                <img src={p.img} alt={p.name} loading="lazy" width={800} height={800}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                {p.tag && (
+                  <span className="absolute top-3 left-3 bg-gradient-primary text-primary-foreground text-[11px] font-bold px-3 py-1 rounded-full shadow-glow">
+                    {p.tag}
+                  </span>
+                )}
+                <span className="absolute top-3 right-3 glass text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wide">
+                  {categories.find((c) => c.id === p.category)?.label.replace(" Figures","").replace(" Boxes","")}
+                </span>
               </div>
-              <ul className="mt-6 space-y-3 text-sm">
-                {t.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-primary" /> {f}
-                  </li>
-                ))}
-              </ul>
-              <a href={WA} target="_blank" rel="noopener"
-                 className={`mt-8 inline-flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-full font-semibold transition-all hover:scale-[1.02]
-                   ${t.featured
-                     ? "bg-gradient-primary text-primary-foreground hover:shadow-glow"
-                     : "glass hover:bg-secondary"}`}>
-                <MessageCircle className="w-4 h-4" /> Order on WhatsApp
-              </a>
-            </div>
+              <div className="p-6">
+                <h3 className="font-display font-bold text-lg">{p.name}</h3>
+                <div className="mt-2 flex items-baseline gap-1">
+                  <span className="text-xs text-muted-foreground">from</span>
+                  <span className="font-display font-bold text-2xl">Rs. {p.price}</span>
+                </div>
+                <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <span className="mt-1.5 w-1 h-1 rounded-full bg-primary shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <a href={waFor(p.name)} target="_blank" rel="noopener"
+                  className="mt-5 inline-flex items-center justify-center gap-2 w-full px-4 py-3 rounded-full text-sm font-semibold bg-gradient-primary text-primary-foreground hover:shadow-glow transition-all hover:scale-[1.02]">
+                  <MessageCircle className="w-4 h-4" /> Order on WhatsApp
+                </a>
+              </div>
+            </article>
           ))}
         </div>
+
+        {list.length === 0 && (
+          <p className="mt-12 text-center text-muted-foreground">No products in this category yet.</p>
+        )}
       </div>
     </section>
   );
@@ -410,7 +480,7 @@ function Index() {
       <Nav />
       <Hero />
       <How />
-      <Pricing />
+      <Products />
       <Gallery />
       <Reviews />
       <FAQ />
