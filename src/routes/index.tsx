@@ -480,7 +480,7 @@ function Index() {
       <Nav />
       <Hero />
       <How />
-      <Pricing />
+      <Products />
       <Gallery />
       <Reviews />
       <FAQ />
