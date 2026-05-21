@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   MessageCircle, Camera, Palette, Printer, Truck,
-  Instagram, Facebook, Mail, MapPin, Star, ChevronDown, Menu, X, Sparkles,
+  Instagram, Facebook, Mail, MapPin, Star, ChevronDown, Menu, X, Sparkles, Lightbulb, Frame, Boxes, Heart,
 } from "lucide-react";
 import heroFig from "@/assets/hero-figurine.png";
 import g1 from "@/assets/gallery-1.jpg";
@@ -11,17 +11,23 @@ import g3 from "@/assets/gallery-3.jpg";
 import g4 from "@/assets/gallery-4.jpg";
 import g5 from "@/assets/gallery-5.jpg";
 import g6 from "@/assets/gallery-6.jpg";
+import catAnime from "@/assets/cat-anime.jpg";
+import catCartoon from "@/assets/cat-cartoon.jpg";
+import catLightbox from "@/assets/cat-lightbox.jpg";
+import catShadowbox from "@/assets/cat-shadowbox.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 const WA = "https://wa.me/947XXXXXXXX?text=Hi%20I%20want%20to%20order%20a%20custom%203D%20figurine";
+const waFor = (product: string) =>
+  `https://wa.me/947XXXXXXXX?text=${encodeURIComponent(`Hi! I'd like to order: ${product}`)}`;
 
 const nav = [
   { label: "Home", href: "#home" },
   { label: "How It Works", href: "#how" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Products", href: "#products" },
   { label: "Gallery", href: "#gallery" },
   { label: "Reviews", href: "#reviews" },
   { label: "FAQ", href: "#faq" },
