@@ -198,7 +198,6 @@ const categories: { id: Category; label: string; icon: React.ComponentType<{ cla
   { id: "cartoon", label: "Cartoon Figures", icon: Heart },
   { id: "anime", label: "Anime Figures", icon: Sparkles },
   { id: "lightbox", label: "Light Boxes", icon: Lightbulb },
-  { id: "shadowbox", label: "Shadow Boxes", icon: Frame },
 ];
 
 type Product = {
@@ -235,18 +234,6 @@ const products: Product[] = [
   {
     id: "l1", name: "Personalized LED Light Box", category: "lightbox", price: "5,500", img: catLightbox,
     features: ["Acrylic 3D engraving", "Wooden LED base", "USB powered"]
-  },
-  {
-    id: "l2", name: "Couple Photo Light Box", category: "lightbox", price: "6,500", img: catLightbox, tag: "Gift Pick",
-    features: ["Your photo engraved", "Warm glow", "Romantic gift"]
-  },
-  {
-    id: "s1", name: "Couple Silhouette Shadow Box", category: "shadowbox", price: "7,500", img: catShadowbox,
-    features: ["Layered paper-cut art", "LED backlight", "Wall mountable"]
-  },
-  {
-    id: "s2", name: "Custom Story Shadow Box", category: "shadowbox", price: "9,500", img: catShadowbox,
-    features: ["Your story scene", "Premium wood frame", "Gift-ready packaging"]
   },
 ];
 
@@ -309,7 +296,8 @@ function Products({ onSelectProduct }: { onSelectProduct: (product: Product) => 
                 </ul>
                 <button onClick={() => onSelectProduct(p)}
                   className="mt-5 inline-flex items-center justify-center gap-2 w-full px-4 py-3 rounded-full text-sm font-semibold bg-gradient-primary text-primary-foreground hover:shadow-glow transition-all hover:scale-[1.02] cursor-pointer">
-                  <MessageCircle className="w-4 h-4" /> Order on WhatsApp
+                  {/* <MessageCircle className="w-4 h-4" /> Order on WhatsApp */}
+                  View All
                 </button>
               </div>
             </article>
